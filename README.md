@@ -4,7 +4,9 @@ A deterministic 2D rigid-body physics engine: a C++17 core with Python bindings.
 
 ![Hinged chain with a heavy ball swinging into a box pyramid while circles and triangles fall](demo/demo.gif)
 
+<!-- table:demo -->
 The scene above is 71 bodies at a fixed 60 Hz step, rendered by [`demo/make_gif.py`](demo/make_gif.py). Running it twice produces a byte-identical GIF and the same final state hash, `0xa61f9bc323437694`.
+<!-- /table:demo -->
 
 ## What it does
 

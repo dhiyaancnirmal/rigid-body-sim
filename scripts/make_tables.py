@@ -159,7 +159,15 @@ def robustness():
     return table(["check", "result"], rows)
 
 
+def demo():
+    d = load("demo.json")
+    return (f"The scene above is {d['bodies']} bodies at a fixed {d['step_hz']} Hz step, rendered by "
+            f"[`demo/make_gif.py`](demo/make_gif.py). Running it twice produces a byte-identical "
+            f"GIF and the same final state hash, `{d['final_state_hash']}`.")
+
+
 TABLES = {
+    "demo": demo,
     "step_bench": step_bench,
     "phases": phases,
     "bench_meta": bench_meta,

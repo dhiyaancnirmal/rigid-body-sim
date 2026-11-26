@@ -8,7 +8,7 @@ prints the final state hash, so two runs can be compared bit for bit.
 """
 
 import argparse
-import math
+import json
 import os
 import sys
 
@@ -127,7 +127,13 @@ def main():
             w.step(DT)
     frames[0].save(args.out, save_all=True, append_images=frames[1:], duration=33, loop=0,
                    optimize=True)
-    print(f"wrote {args.out}: {len(frames)} frames, final state hash 0x{w.state_hash():016x}")
+    summary = {"bodies": len(kinds), "step_hz": round(1 / DT), "seconds": SECONDS,
+               "frames": len(frames), "final_state_hash": f"0x{w.state_hash():016x}"}
+    results = os.path.join(os.path.dirname(__file__), "..", "results", "demo.json")
+    with open(results, "w") as f:
+        json.dump(summary, f, indent=2)
+        f.write("\n")
+    print(f"wrote {args.out} and results/demo.json: {summary}")
 
 
 if __name__ == "__main__":
