@@ -70,14 +70,14 @@ def coulomb_slide_distance(slope_deg, mu, seconds):
     return 0.5 * G * (math.sin(th) - mu * math.cos(th)) * seconds * seconds
 
 
-def shoot(speed, shape, size, angle, dt, speculative=True):
+def shoot(speed, shape, size, angle, dt, speculative=True, restitution=0.0):
     """Fire a body at a thin static wall; return its final x (wall spans |x| < 0.05)."""
     w = free_space(speculative=speculative)
     w.add_box(0.0, 0.0, WALL_HALF, 20.0, static=True)
     if shape == "circle":
-        w.add_circle(-3.0, 0.3, size, vx=speed)
+        w.add_circle(-3.0, 0.3, size, vx=speed, restitution=restitution)
     else:
-        w.add_box(-3.0, 0.3, size, size, angle=angle, vx=speed)
+        w.add_box(-3.0, 0.3, size, size, angle=angle, vx=speed, restitution=restitution)
     w.step(dt, n=int(3.0 / (speed * dt)) + 60)
     return w.positions()[1, 0]
 

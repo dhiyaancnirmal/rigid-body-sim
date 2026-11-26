@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstring>
+#include <limits>
 #include <stdexcept>
 
 namespace rbsim {
@@ -352,6 +353,12 @@ void World::prepare(double dt) {
             if (sep > 0.0) {
                 if (bounces && sep + vn0 * dt < 0.0) {
                     cp.target_velocity = -m.restitution * vn0;  // impact lands inside this step
+                } else if (m.restitution > 0.0) {
+                    // Elastic contact not expected to close this step: leave it
+                    // free. If another impulse knocks the bodies together anyway,
+                    // capping the approach here would stop them dead and lose the
+                    // bounce; next step it is a touching contact and bounces.
+                    cp.target_velocity = -std::numeric_limits<double>::infinity();
                 } else {
                     cp.target_velocity = -sep * inv_dt;  // may close the gap, never more
                 }
@@ -375,7 +382,11 @@ void World::prepare(double dt) {
             m.k22 = ms + a.inv_inertia * rn2a * rn2a + b.inv_inertia * rn2b * rn2b;
             m.k12 = ms + a.inv_inertia * rn1a * rn2a + b.inv_inertia * rn1b * rn2b;
             // Use the block solver only when K is well conditioned.
-            m.block = m.k11 * m.k11 < 1000.0 * (m.k11 * m.k22 - m.k12 * m.k12);
+            // Use the block solver only when K is well conditioned and both
+            // points are constrained (a free point has an infinite target).
+            const double lowest = -std::numeric_limits<double>::infinity();
+            m.block = m.k11 * m.k11 < 1000.0 * (m.k11 * m.k22 - m.k12 * m.k12) &&
+                      c1.target_velocity != lowest && c2.target_velocity != lowest;
         }
     }
 

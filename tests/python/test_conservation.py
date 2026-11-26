@@ -5,7 +5,7 @@ import math
 from hypothesis import given
 from hypothesis import strategies as st
 
-from rbsim.experiments import free_space
+from rbsim.experiments import elastic_gas_energy_ratio, free_space
 
 DT = 1.0 / 60.0
 
@@ -81,3 +81,11 @@ def test_elastic_bounce_off_static_wall_keeps_speed(v, angle):
     vx, vy, _ = w.velocities()[1]
     assert vx < 0.0
     assert abs(math.hypot(vx, vy) - v) <= 1e-12 * v
+
+
+def test_dense_elastic_gas_keeps_energy():
+    # 100 elastic circles in an elastic box for 20 s, with many simultaneous
+    # contacts. Regression: speculative contacts that switched on mid-solve
+    # used to stop circles dead at the surface and lost 22-31% of the energy.
+    for seed in range(3):
+        assert abs(elastic_gas_energy_ratio(100, seed) - 1.0) < 1e-3

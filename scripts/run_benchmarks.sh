@@ -13,8 +13,8 @@ baseline="${1:-bde00f7}"
 cpu="${BENCH_CPU:-3}"
 py="${PYTHON:-python3}"
 
-cmake -S . -B build -DRBSIM_PYTHON=OFF > /dev/null
-cmake --build build -j2 --target bench_step bench_integrators > /dev/null
+cmake -S . -B build-det/current -DRBSIM_PYTHON=OFF > /dev/null
+cmake --build build-det/current -j2 --target bench_step bench_integrators > /dev/null
 
 wt="build-det/baseline-src"
 rm -rf "$wt"
@@ -41,9 +41,9 @@ tmp="$(mktemp -d)"
 # both equally; the summary keeps each configuration's fastest round.
 for r in $(seq 1 "$rounds"); do
   taskset -c "$cpu" build-det/baseline/bench_step > "$tmp/baseline_$r.json"
-  taskset -c "$cpu" build/bench_step > "$tmp/current_$r.json"
+  taskset -c "$cpu" build-det/current/bench_step > "$tmp/current_$r.json"
 done
-taskset -c "$cpu" build/bench_integrators > results/integrators.json
+taskset -c "$cpu" build-det/current/bench_integrators > results/integrators.json
 
 "$py" - "$meta" "$tmp" "$rounds" <<'EOF'
 import json, sys
