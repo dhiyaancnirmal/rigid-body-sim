@@ -1,0 +1,7 @@
+.venv/
+build/
+__pycache__/
+*.so
+.hypothesis/
+.pytest_cache/
+demo/frames/
