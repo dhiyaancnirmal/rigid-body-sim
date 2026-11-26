@@ -68,17 +68,12 @@ void broadphases_give_identical_trajectories() {
     CHECK(same);
 }
 
-// The pile after 10 s must hash to the same value on every machine and
-// compiler that builds with this repo's flags. If you change the physics on
-// purpose, update the constant and say why in the commit.
-constexpr std::uint64_t kGoldenPile100 = 0x778f89916d94c2deull;
-
 void golden_hash_matches() {
     World w = scenes::pile(100);
     for (int i = 0; i < 600; ++i) w.step(1.0 / 60.0);
     const std::uint64_t h = w.state_hash();
     std::printf("  pile(100) hash after 600 steps: 0x%016" PRIx64 "\n", h);
-    CHECK(h == kGoldenPile100);
+    CHECK(h == scenes::kPile100Hash600);
 }
 
 void stack_of_ten_settles() {

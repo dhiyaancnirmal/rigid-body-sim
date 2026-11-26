@@ -6,6 +6,12 @@
 
 namespace rbsim::scenes {
 
+// State hash of pile(100) after 600 steps of 1/60 s. Every machine and
+// compiler that builds with this repo's flags must reproduce it, from C++ and
+// from Python. If you change the physics on purpose, update it and say why in
+// the commit.
+constexpr std::uint64_t kPile100Hash600 = 0x778f89916d94c2deull;
+
 // Static floor and two walls forming an open box `width` wide.
 inline void add_container(World& w, double width, double height) {
     BodyDef d;

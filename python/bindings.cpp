@@ -6,7 +6,7 @@
 #include <tuple>
 #include <vector>
 
-#include "rbsim/world.hpp"
+#include "rbsim/scenes.hpp"
 
 namespace py = pybind11;
 using namespace rbsim;
@@ -210,4 +210,9 @@ PYBIND11_MODULE(_rbsim, m) {
                                  py::arg("steps") = t.steps);
              })
         .def("reset_timings", [](World& w) { w.timings = StepTimings{}; });
+
+    m.def("pile", &scenes::pile, "Reference pile scene shared with the C++ tests and benchmarks.",
+          py::arg("n"), py::arg("broadphase") = Broadphase::SweepAndPrune);
+    m.attr("PILE100_HASH600") = scenes::kPile100Hash600;
+    m.def("stack",&scenes::stack, "A vertical stack of n unit boxes.", py::arg("n"));
 }
