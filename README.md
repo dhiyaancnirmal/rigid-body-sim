@@ -184,7 +184,7 @@ Each call to `World::step(dt)` runs five phases.
 4. **Solve velocities.** Last step's impulses are applied first (warm starting), then 8 iterations of sequential impulses. Each contact gets a non-negative normal impulse that keeps its normal velocity at or above a target, and a friction impulse clamped to μ times that normal impulse. For a touching contact, the target pushes out a fraction of any penetration beyond the slop (Baumgarte stabilization). For a speculative contact, the target lets the gap close but not go negative. When a contact will bounce this step, the target is −e × the pre-solve approach speed. An elastic speculative contact that is not expected to close this step is left free. Capping it would stop a body dead if another collision knocked it toward its neighbour mid-solve. Instead it becomes a touching contact next step and bounces. Two-point manifolds solve both normal impulses at once as a 2x2 linear complementarity problem, which keeps stacks symmetric. Rods and hinges are solved the same way, with their own effective masses.
 5. **Integrate positions.** `x += dt * v`. Rotation is stored as a unit complex number (cos θ, sin θ) and advanced by multiplying with (1, ω dt) and renormalizing. That needs only multiplies, adds and a square root. All of these are correctly rounded IEEE operations, so no step depends on a platform's `sin` or `cos`.
 
-**Why it replays bit-for-bit.** The step uses only correctly rounded operations, every sort has a total order, there is no threading, and the core builds with `-ffp-contract=off` so the compiler cannot fuse a multiply and an add into an FMA. `state_hash()` is FNV-1a over the bit patterns of every position, rotation and velocity. The determinism script shows the same hash at -O0, -O2, -O3 and with AVX2/FMA code generation, and a different hash once contraction is allowed.
+**Why it replays bit-for-bit.** The step uses only correctly rounded operations, every sort has a total order, there is no threading, and the core builds with `-ffp-contract=off` so the compiler cannot fuse a multiply and an add into an FMA. `state_hash()` is FNV-1a over the bit patterns of every position, rotation and velocity. The determinism script shows the same hash at -O0, -O2, -O3 and with AVX2/FMA code generation, and a different hash once contraction is allowed. The C++ test checks the same golden hash in CI on a GitHub-hosted runner with a newer GCC.
 
 ## Limitations
 
@@ -192,7 +192,7 @@ Each call to `World::step(dt)` runs five phases.
 - Sequential impulses converge slowly through long chains of contacts, so tall stacks need more iterations (see the robustness table).
 - Large mass ratios stretch joint chains. A ball much heavier than its chain links visibly pulls the links apart at 8 iterations.
 - Speculative margins come from velocities before the solve. A body that a collision speeds up within the step can still sink into a third body until the next step corrects it.
-- Bit-exact replay is verified across builds on one machine: optimization levels and instruction sets with GCC 14 on x86-64. Other compilers, CPUs and architectures are untested.
+- Bit-exact replay is checked across optimization levels and instruction sets with GCC 14 on one x86-64 machine. CI also checks the golden hash on a GitHub-hosted runner (ubuntu-26.04, GCC 15.2), which matches. Clang, MSVC and ARM are untested.
 
 ## Layout
 
