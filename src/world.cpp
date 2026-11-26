@@ -25,9 +25,11 @@ bool overlaps(const AABB& a, const AABB& b) {
            b.lower.y <= a.upper.y;
 }
 
-Vec2 velocity_at(const Body& body, Vec2 r) { return body.v + cross(body.w, r); }
+template <class B>
+Vec2 velocity_at(const B& body, Vec2 r) { return body.v + cross(body.w, r); }
 
-void apply_impulse(Body& a, Body& b, Vec2 ra, Vec2 rb, Vec2 p) {
+template <class B>
+void apply_impulse(B& a, B& b, Vec2 ra, Vec2 rb, Vec2 p) {
     a.v -= a.inv_mass * p;
     a.w -= a.inv_inertia * cross(ra, p);
     b.v += b.inv_mass * p;
@@ -37,7 +39,7 @@ void apply_impulse(Body& a, Body& b, Vec2 ra, Vec2 rb, Vec2 p) {
 // Solve both normal impulses of a two-point manifold at once, as in Box2D's
 // b2ContactSolver: find x >= 0 with w = K x + b >= 0 and x_i w_i = 0 by
 // trying the four complementarity cases in turn.
-void solve_block(Manifold& m, Body& a, Body& b) {
+void solve_block(Manifold& m, SolverBody& a, SolverBody& b) {
     ContactPoint& c1 = m.points[0];
     ContactPoint& c2 = m.points[1];
     const Vec2 n = m.normal;
@@ -160,8 +162,17 @@ void World::step(double dt) {
     narrowphase();
     const auto t2 = Clock::now();
     prepare(dt);
+    solver_.resize(bodies.size());
+    for (std::size_t i = 0; i < bodies.size(); ++i) {
+        const Body& b = bodies[i];
+        solver_[i] = {b.v, b.w, b.inv_mass, b.inv_inertia, 0.0};
+    }
     warm_start();
     for (int i = 0; i < settings.velocity_iterations; ++i) solve_velocities();
+    for (std::size_t i = 0; i < bodies.size(); ++i) {
+        bodies[i].v = solver_[i].v;
+        bodies[i].w = solver_[i].w;
+    }
     const auto t3 = Clock::now();
     integrate_positions(dt);
     const auto t4 = Clock::now();
@@ -372,8 +383,8 @@ void World::prepare(double dt) {
 
 void World::warm_start() {
     for (Manifold& m : manifolds_) {
-        Body& a = bodies[m.a];
-        Body& b = bodies[m.b];
+        SolverBody& a = solver_[m.a];
+        SolverBody& b = solver_[m.b];
         const Vec2 t{m.normal.y, -m.normal.x};
         for (int i = 0; i < m.count; ++i) {
             const ContactPoint& cp = m.points[i];
@@ -381,17 +392,17 @@ void World::warm_start() {
         }
     }
     for (DistanceJoint& j : distance_joints) {
-        apply_impulse(bodies[j.a], bodies[j.b], j.ra, j.rb, j.impulse * j.u);
+        apply_impulse(solver_[j.a], solver_[j.b], j.ra, j.rb, j.impulse * j.u);
     }
     for (RevoluteJoint& j : revolute_joints) {
-        apply_impulse(bodies[j.a], bodies[j.b], j.ra, j.rb, j.impulse);
+        apply_impulse(solver_[j.a], solver_[j.b], j.ra, j.rb, j.impulse);
     }
 }
 
 void World::solve_velocities() {
     for (DistanceJoint& j : distance_joints) {
-        Body& a = bodies[j.a];
-        Body& b = bodies[j.b];
+        SolverBody& a = solver_[j.a];
+        SolverBody& b = solver_[j.b];
         const double cdot = dot(velocity_at(b, j.rb) - velocity_at(a, j.ra), j.u);
         const double lambda = -j.mass * (cdot + j.bias);
         j.impulse += lambda;
@@ -399,8 +410,8 @@ void World::solve_velocities() {
     }
 
     for (RevoluteJoint& j : revolute_joints) {
-        Body& a = bodies[j.a];
-        Body& b = bodies[j.b];
+        SolverBody& a = solver_[j.a];
+        SolverBody& b = solver_[j.b];
         const Vec2 rhs = velocity_at(b, j.rb) - velocity_at(a, j.ra) + j.bias;
         // Solve K * impulse = -rhs for the symmetric 2x2 K.
         const double det = j.k11 * j.k22 - j.k12 * j.k12;
@@ -412,8 +423,8 @@ void World::solve_velocities() {
     }
 
     for (Manifold& m : manifolds_) {
-        Body& a = bodies[m.a];
-        Body& b = bodies[m.b];
+        SolverBody& a = solver_[m.a];
+        SolverBody& b = solver_[m.b];
         const Vec2 n = m.normal;
         const Vec2 t{n.y, -n.x};
 

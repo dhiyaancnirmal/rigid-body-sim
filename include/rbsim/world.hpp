@@ -49,6 +49,17 @@ struct Body {
     bool is_static() const { return inv_mass == 0.0; }
 };
 
+// The four numbers the velocity solver touches, packed into 48 bytes. The
+// solver iterates over these instead of the full Body (about 400 bytes with
+// its shape), so a cache line holds a body's whole solver state.
+struct SolverBody {
+    Vec2 v;
+    double w = 0.0;
+    double inv_mass = 0.0;
+    double inv_inertia = 0.0;
+    double pad_ = 0.0;
+};
+
 struct ContactPoint {
     Vec2 point;
     double separation = 0.0;
@@ -146,6 +157,7 @@ private:
     std::vector<std::uint64_t> jointed_;  // sorted body-pair keys that never collide
     std::vector<Manifold> manifolds_;
     std::vector<Manifold> previous_;
+    std::vector<SolverBody> solver_;
 };
 
 }  // namespace rbsim
