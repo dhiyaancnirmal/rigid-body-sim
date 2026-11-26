@@ -31,20 +31,26 @@ Every number below is generated from a file in [`results/`](results/) by [`scrip
 
 ### Performance: hot path before and after
 
-Reference scene: a pile of boxes, circles and triangles settling in a container (`scenes::pile`). The broadphase moved from O(n²) brute force to sweep and prune. Then the solver moved from full `Body` structs (about 400 bytes each, with the shape inside) to packed 48-byte `SolverBody` records. Both changes keep the same floating-point operations in the same order, so trajectories stay bit-identical.
+Reference scene: a pile of boxes, circles and triangles settling in a container (`scenes::pile`). Three versions of the hot path:
+
+1. **Brute force.** Tests every pair of bounding boxes, O(n²).
+2. **Sweep and prune.** Sorts boxes on x and tests only boxes whose x intervals overlap.
+3. **Incremental sweep.** Keeps the sorted order between steps and repairs it with insertion sort, which is near-linear because bodies move little per step. It also sweeps a contiguous copy of the boxes and tests the y overlap before touching any body data. This version also includes packed 48-byte solver records, described below.
+
+All three produce the same pairs in the same order, so trajectories are bit-identical (last column).
 
 <!-- table:step_bench -->
-| bodies | brute force (ms) | + sweep and prune (ms) | + packed solver bodies (ms) | total speedup | same final hash |
+| bodies | brute force (ms) | + sweep and prune (ms) | + incremental sort, contiguous sweep (ms) | total speedup | same final hash |
 |---|---|---|---|---|---|
-| 250 | 0.30 | 0.26 | 0.26 | 1.1x | yes |
-| 500 | 0.78 | 0.61 | 0.61 | 1.3x | yes |
-| 1000 | 2.05 | 1.32 | 1.32 | 1.6x | yes |
-| 2000 | 6.15 | 3.00 | 3.00 | 2.0x | yes |
-| 4000 | 19.04 | 7.12 | 7.39 | 2.6x | yes |
+| 250 | 0.30 | 0.26 | 0.25 | 1.2x | yes |
+| 500 | 0.79 | 0.61 | 0.58 | 1.4x | yes |
+| 1000 | 2.11 | 1.32 | 1.24 | 1.7x | yes |
+| 2000 | 6.18 | 3.02 | 2.80 | 2.2x | yes |
+| 4000 | 19.30 | 7.22 | 6.37 | 3.0x | yes |
 <!-- /table:step_bench -->
 
 <!-- table:bench_meta -->
-Measured on AMD Ryzen 3 3200G with Radeon Vega Graphics, c++ (Debian 14.2.0-19) 14.2.0, -O3 (CMake Release) -ffp-contract=off -fno-fast-math, pinned to one core, best of 5 repeats of 120 steps after 120 warm-up steps (load average 4.50 6.29 5.25 at start).
+Measured on AMD Ryzen 3 3200G with Radeon Vega Graphics, c++ (Debian 14.2.0-19) 14.2.0, -O3 (CMake Release) -ffp-contract=off -fno-fast-math, pinned to one core, best of 5 repeats of 120 steps after 120 warm-up steps (load average 3.11 4.35 4.70 at start).
 <!-- /table:bench_meta -->
 
 Where the time goes at 4000 bodies, from the engine's own per-phase timers:
@@ -52,13 +58,15 @@ Where the time goes at 4000 bodies, from the engine's own per-phase timers:
 <!-- table:phases -->
 | 4000 bodies | broadphase (ms) | narrowphase (ms) | solver (ms) | whole step (ms) |
 |---|---|---|---|---|
-| brute force, Body structs | 13.96 | 1.44 | 3.61 | 19.04 |
-| sweep and prune, Body structs | 2.26 | 1.41 | 3.43 | 7.12 |
-| brute force, packed solver | 13.97 | 1.45 | 3.22 | 18.68 |
-| sweep and prune, packed solver | 2.38 | 1.51 | 3.45 | 7.39 |
+| brute force (baseline) | 14.06 | 1.46 | 3.74 | 19.30 |
+| sweep and prune (baseline) | 2.27 | 1.42 | 3.51 | 7.22 |
+| brute force (current) | 14.54 | 1.42 | 3.17 | 19.18 |
+| sweep and prune (current) | 1.70 | 1.43 | 3.21 | 6.37 |
 <!-- /table:phases -->
 
 A callgrind profile of the baseline ([`results/profile_callgrind_bde00f7.txt`](results/profile_callgrind_bde00f7.txt)) put 49% of instructions in pair finding and 29% in the velocity solver. That is why these two parts were the ones optimized.
+
+One change did not pay off. The velocity solver was switched from reading full `Body` structs (about 400 bytes each, with the shape inside) to packed 48-byte `SolverBody` records, expecting fewer cache misses. Solver time at 4000 bodies changed by 0% in one full interleaved run and by 9% in the committed one (solver column above), which is within run-to-run noise on this shared machine. The fields the solver reads were already adjacent inside `Body`, and both layouts fit in this CPU's 4 MB L3. The packed layout stayed because it is no slower and keeps the solver's data explicit.
 
 ### Integrators: accuracy against cost
 
@@ -67,18 +75,18 @@ Four integrators on three systems with known periods, each run for exactly 100 p
 <!-- table:integrators -->
 | system | method | steps per period | max energy error | position error after 100 periods | ns per step |
 |---|---|---|---|---|---|
-| harmonic oscillator | explicit Euler | 800 | 1.4e2 | 1.1e1 | 13.2 |
+| harmonic oscillator | explicit Euler | 800 | 1.4e2 | 1.1e1 | 13.3 |
 | harmonic oscillator | semi-implicit Euler | 800 | 3.9e-3 | 7.6e-6 | 16.9 |
-| harmonic oscillator | velocity Verlet | 800 | 1.5e-5 | 1.3e-6 | 19.3 |
+| harmonic oscillator | velocity Verlet | 800 | 1.5e-5 | 1.3e-6 | 19.5 |
 | harmonic oscillator | RK4 | 200 | 2.7e-7 | 1.3e-7 | 28.5 |
-| pendulum, 115 deg | explicit Euler | 800 | 1.0e1 | 1.7e3 | 32.2 |
-| pendulum, 115 deg | semi-implicit Euler | 800 | 1.5e-2 | 6.4e-6 | 30.1 |
-| pendulum, 115 deg | velocity Verlet | 800 | 7.1e-5 | 1.5e-6 | 31.8 |
-| pendulum, 115 deg | RK4 | 200 | 2.7e-6 | 1.2e-6 | 60.9 |
-| Kepler orbit, e = 0.5 | explicit Euler | 800 | 9.1e-1 | 1.9e1 | 27.9 |
-| Kepler orbit, e = 0.5 | semi-implicit Euler | 800 | 1.1e-2 | 6.3e-1 | 31.3 |
-| Kepler orbit, e = 0.5 | velocity Verlet | 800 | 1.7e-4 | 2.7e-1 | 34.7 |
-| Kepler orbit, e = 0.5 | RK4 | 200 | 9.3e-5 | 7.7e-2 | 58.4 |
+| pendulum, 115 deg | explicit Euler | 800 | 1.0e1 | 1.7e3 | 32.5 |
+| pendulum, 115 deg | semi-implicit Euler | 800 | 1.5e-2 | 6.4e-6 | 30.8 |
+| pendulum, 115 deg | velocity Verlet | 800 | 7.1e-5 | 1.5e-6 | 31.5 |
+| pendulum, 115 deg | RK4 | 200 | 2.7e-6 | 1.2e-6 | 59.7 |
+| Kepler orbit, e = 0.5 | explicit Euler | 800 | 9.1e-1 | 1.9e1 | 27.5 |
+| Kepler orbit, e = 0.5 | semi-implicit Euler | 800 | 1.1e-2 | 6.3e-1 | 31.0 |
+| Kepler orbit, e = 0.5 | velocity Verlet | 800 | 1.7e-4 | 2.7e-1 | 34.4 |
+| Kepler orbit, e = 0.5 | RK4 | 200 | 9.3e-5 | 7.7e-2 | 58.0 |
 <!-- /table:integrators -->
 
 Over long runs, the symplectic methods keep a bounded energy error, while RK4's error grows steadily (harmonic oscillator):

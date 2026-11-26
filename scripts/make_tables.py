@@ -53,7 +53,7 @@ def step_bench():
         rows.append([n, f"{brute:.2f}", f"{sap:.2f}", f"{packed:.2f}", f"{brute / packed:.1f}x",
                      "yes" if same else "NO"])
     return table(["bodies", "brute force (ms)", "+ sweep and prune (ms)",
-                  "+ packed solver bodies (ms)", "total speedup", "same final hash"], rows)
+                  "+ incremental sort, contiguous sweep (ms)", "total speedup", "same final hash"], rows)
 
 
 def phases():
@@ -64,7 +64,7 @@ def phases():
             if r["bodies"] != 4000:
                 continue
             name = {"brute_force": "brute force", "sweep_and_prune": "sweep and prune"}[r["broadphase"]]
-            name += ", packed solver" if label == "current" else ", Body structs"
+            name += " (current)" if label == "current" else " (baseline)"
             rows.append([name, f"{r['broadphase_ms']:.2f}", f"{r['narrowphase_ms']:.2f}",
                          f"{r['solve_ms']:.2f}", f"{r['step_ms']:.2f}"])
     return table(["4000 bodies", "broadphase (ms)", "narrowphase (ms)", "solver (ms)",
