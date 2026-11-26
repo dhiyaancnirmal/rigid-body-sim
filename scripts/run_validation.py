@@ -57,17 +57,21 @@ def elastic_gas():
     return rows
 
 
+STACK_HEIGHTS = (5, 10, 15, 20, 25, 30, 40)
+
+
 def stacks():
     rows = []
     for iters in (8, 16, 32):
         best = 0
-        for n in (5, 10, 15, 20, 25, 30, 40):
+        for n in STACK_HEIGHTS:
             drift, sink = ex.stack_drift(n, iterations=iters)
             if drift < 0.01 and sink < 0.05:
                 best = n
             else:
                 break
-        rows.append({"velocity_iterations": iters, "max_stable_boxes": best})
+        rows.append({"velocity_iterations": iters, "max_stable_boxes": best,
+                     "tested_heights": list(STACK_HEIGHTS)})
     return rows
 
 
@@ -85,6 +89,8 @@ def momentum():
                     w.add_circle(4 * math.cos(a), 4 * math.sin(a), 0.5, **kw)
                 else:
                     w.add_box(4 * math.cos(a), 4 * math.sin(a), 0.5, 0.5, angle=a, **kw)
+            p = w.positions()
+            w.add_distance_joint(0, 1, tuple(p[0]), tuple(p[1]))  # a rigid rod
             p0, l0 = w.linear_momentum(), w.angular_momentum()
             scale = sum(w.mass(i) for i in range(n)) * speed * 5.0
             w.step(1 / 60, n=180)

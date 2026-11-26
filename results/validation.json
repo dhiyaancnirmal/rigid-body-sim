@@ -135,37 +135,64 @@
     {
       "circles": 50,
       "energy_ratio_after_20s": [
-        0.9221720441422661,
-        0.9212954709253024,
-        0.9777528053945046
+        1.0000000001098313,
+        1.0000000003687455,
+        0.9999999999842343
       ]
     },
     {
       "circles": 100,
       "energy_ratio_after_20s": [
-        0.7781428337148302,
-        0.7363888510036211,
-        0.6911887099002308
+        0.9997396310409724,
+        0.9999933072665396,
+        0.9997264667723244
       ]
     }
   ],
   "stack_stability": [
     {
       "velocity_iterations": 8,
-      "max_stable_boxes": 10
+      "max_stable_boxes": 10,
+      "tested_heights": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        40
+      ]
     },
     {
       "velocity_iterations": 16,
-      "max_stable_boxes": 15
+      "max_stable_boxes": 15,
+      "tested_heights": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        40
+      ]
     },
     {
       "velocity_iterations": 32,
-      "max_stable_boxes": 20
+      "max_stable_boxes": 20,
+      "tested_heights": [
+        5,
+        10,
+        15,
+        20,
+        25,
+        30,
+        40
+      ]
     }
   ],
   "momentum": {
-    "max_rel_linear_drift": 3.138394452836572e-17,
-    "max_rel_angular_drift": 4.041927345960342e-16
+    "max_rel_linear_drift": 4.1480943830174276e-17,
+    "max_rel_angular_drift": 8.496753116184942e-15
   },
   "pile100_hash_after_600_steps": "0x778f89916d94c2de"
 }

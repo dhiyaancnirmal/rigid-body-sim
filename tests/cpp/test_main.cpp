@@ -1,5 +1,5 @@
 // C++ tests for contracts that live below the Python layer: mass properties,
-// bit-exact replay, broadphase equivalence and the cross-machine golden hash.
+// bit-exact replay, broadphase equivalence and the golden hash.
 #include <cinttypes>
 #include <cmath>
 #include <cstdio>

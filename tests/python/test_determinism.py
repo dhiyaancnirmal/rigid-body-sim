@@ -12,7 +12,7 @@ def run_hashes(n_steps, broadphase=rbsim.Broadphase.SWEEP_AND_PRUNE):
     return hashes
 
 
-def test_python_run_reproduces_the_cross_machine_golden_hash():
+def test_python_run_reproduces_the_golden_hash():
     # Same constant the C++ test checks: stepping from Python must not
     # perturb a single bit.
     assert run_hashes(600)[-1] == rbsim.PILE100_HASH600

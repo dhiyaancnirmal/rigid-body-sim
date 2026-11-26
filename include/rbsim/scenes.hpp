@@ -1,14 +1,15 @@
 // Reference scenes shared by the tests and benchmarks. They use no libm calls
-// during setup, so their state hashes are comparable across machines.
+// during setup, so their state hashes do not depend on the platform's libm.
 #pragma once
 
 #include "rbsim/world.hpp"
 
 namespace rbsim::scenes {
 
-// State hash of pile(100) after 600 steps of 1/60 s. Every machine and
-// compiler that builds with this repo's flags must reproduce it, from C++ and
-// from Python. If you change the physics on purpose, update it and say why in
+// State hash of pile(100) after 600 steps of 1/60 s. Every build with this
+// repo's floating-point flags must reproduce it, from C++ and from Python;
+// scripts/check_determinism.sh checks several optimization levels and
+// instruction sets. If you change the physics on purpose, update it and say why in
 // the commit.
 constexpr std::uint64_t kPile100Hash600 = 0x778f89916d94c2deull;
 

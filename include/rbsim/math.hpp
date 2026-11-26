@@ -1,6 +1,6 @@
 // Small 2D math kit. Everything here uses only IEEE-754 basic operations and
 // sqrt, which are correctly rounded on every conforming platform. That is what
-// lets a simulation replay bit-for-bit across machines: no libm sin/cos/atan
+// lets a simulation replay bit-for-bit across builds: no libm sin/cos/atan
 // runs inside World::step.
 #pragma once
 

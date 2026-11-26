@@ -30,6 +30,9 @@ def sci(x):
 
 
 def pct(x, digits=2):
+    # Tiny values in scientific notation so they do not print as "+0.000%".
+    if x != 0 and abs(100 * x) < 10 ** -digits:
+        return ("+" if x > 0 else "-") + sci(abs(100 * x)) + "%"
     return f"{100 * x:+.{digits}f}%"
 
 
@@ -74,8 +77,24 @@ def phases():
 def bench_meta():
     m = load("step_bench.json")["meta"]
     return (f"Measured on {m['cpu']}, {m['compiler']}, {m['flags']}, pinned to one core, "
-            f"best of 5 repeats of 120 steps after 120 warm-up steps "
-            f"(load average {m['load_average_at_start']} at start).")
+            f"120 steps after 120 warm-up steps; each cell is the best of {m['rounds']} rounds "
+            f"that alternate baseline and current builds, each round the best of 5 repeats "
+            f"(load average {m['load_average_at_start']} at start, {m['load_average_at_end']} "
+            f"at end, on a shared 4-core machine).")
+
+
+def packing():
+    d = load("step_bench.json")
+    base = {(r["bodies"], r["broadphase"]): r for r in d["baseline"]["runs"]}
+    cur = {(r["bodies"], r["broadphase"]): r for r in d["current"]["runs"]}
+    b = base[(4000, "brute_force")]["solve_ms"]
+    c = cur[(4000, "brute_force")]["solve_ms"]
+    nb = base[(4000, "brute_force")]["narrowphase_ms"]
+    nc = cur[(4000, "brute_force")]["narrowphase_ms"]
+    return (f"In the brute-force rows at 4000 bodies, where the broadphase code is the same in "
+            f"both builds, solver time went from {b:.2f} ms to {c:.2f} ms ({(c - b) / b:+.1%}). "
+            f"The narrowphase, whose code did not change at all, moved {(nc - nb) / nb:+.1%} in "
+            f"the same run, which is the noise floor on this shared machine.")
 
 
 METHOD = {"explicit_euler": "explicit Euler", "semi_implicit_euler": "semi-implicit Euler",
@@ -93,9 +112,10 @@ def integrators():
         e = "diverged" if r["blew_up"] else sci(r["max_rel_energy_error"])
         p = "diverged" if r["blew_up"] else sci(r["final_position_error"])
         rows.append([SYSTEM[r["system"]], METHOD[r["method"]], r["steps_per_period"], e, p,
-                     f"{r['ns_per_step']:.1f}"])
+                     f"{r['ns_per_step']:.1f}",
+                     f"{r['ns_per_step'] * r['steps_per_period'] / 1000:.1f}"])
     return table(["system", "method", "steps per period", "max energy error",
-                  "position error after 100 periods", "ns per step"], rows)
+                  "position error after 100 periods", "ns per step", "µs per period"], rows)
 
 
 def long_horizon():
@@ -136,9 +156,10 @@ def robustness():
     diff = [b["name"] for b in det["builds"] if b["hash"] != det["expected"]]
     mom = v["momentum"]
 
-    def gas_range(n):
-        lo, hi = min(gas[n]), max(gas[n])
-        return f"{pct(lo - 1, 1)} to {pct(hi - 1, 1)}"
+    def gas_err(n):
+        return sci(max(abs(r - 1.0) for r in gas[n]))
+
+    heights = v["stack_stability"][0]["tested_heights"]
 
     rows = [
         ["Tunneling, 0.25 m circle into 0.1 m wall at 60 Hz, discrete contacts",
@@ -148,11 +169,10 @@ def robustness():
         ["Linear momentum drift, contact + friction + rod scenes",
          f"{sci(mom['max_rel_linear_drift'])} (relative)"],
         ["Angular momentum drift, same scenes", f"{sci(mom['max_rel_angular_drift'])} (relative)"],
-        ["Elastic gas energy change after 20 s, 2 and 10 circles",
-         f"{gas_range(2)}; {gas_range(10)}"],
-        ["Same, 50 and 100 circles (simultaneous contacts)", f"{gas_range(50)}; {gas_range(100)}"],
-        ["Tallest stable stack (1 cm offsets), 8 / 16 / 32 iterations",
-         f"{stack[8]} / {stack[16]} / {stack[32]} boxes"],
+        ["Elastic gas, worst relative energy change after 20 s (3 seeds), 2 / 10 / 50 / 100 circles",
+         f"{gas_err(2)} / {gas_err(10)} / {gas_err(50)} / {gas_err(100)}"],
+        [f"Tallest stable stack (1 cm offsets; heights tried: {', '.join(map(str, heights))}), "
+         "8 / 16 / 32 iterations", f"{stack[8]} / {stack[16]} / {stack[32]} boxes"],
         ["Bit-identical pile hash across builds", ", ".join(same)],
         ["Hash changes (negative control)", ", ".join(diff) or "none"],
     ]
@@ -168,6 +188,7 @@ def demo():
 
 TABLES = {
     "demo": demo,
+    "packing": packing,
     "step_bench": step_bench,
     "phases": phases,
     "bench_meta": bench_meta,
