@@ -152,7 +152,13 @@ private:
     };
     std::vector<AABB> aabbs_;
     std::vector<double> margins_;
-    std::vector<int> order_;
+    std::vector<int> order_;  // body indices in sweep order, kept between steps
+    struct SweepBox {
+        AABB box;
+        int id;
+        bool is_static;
+    };
+    std::vector<SweepBox> sorted_;
     std::vector<Pair> pairs_;
     std::vector<std::uint64_t> jointed_;  // sorted body-pair keys that never collide
     std::vector<Manifold> manifolds_;

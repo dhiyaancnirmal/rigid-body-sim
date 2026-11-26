@@ -1,0 +1,266 @@
+{
+  "meta": {
+    "cpu": "AMD Ryzen 3 3200G with Radeon Vega Graphics",
+    "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+    "flags": "-O3 (CMake Release) -ffp-contract=off -fno-fast-math",
+    "pinned_cpu": 3,
+    "load_average_at_start": "4.50 6.29 5.25",
+    "baseline_rev": "bde00f7",
+    "load_average_at_end": "4.77 5.02 4.94",
+    "rounds": 3
+  },
+  "baseline": {
+    "warmup_steps": 120,
+    "window_steps": 120,
+    "repeats": 5,
+    "runs": [
+      {
+        "bodies": 250,
+        "broadphase": "brute_force",
+        "step_ms": 0.2984,
+        "broadphase_ms": 0.0971,
+        "narrowphase_ms": 0.0634,
+        "solve_ms": 0.1369,
+        "integrate_ms": 0.0009,
+        "pairs": 605.3,
+        "manifolds": 473.3,
+        "final_hash": "0x521135393f18797f"
+      },
+      {
+        "bodies": 250,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 0.2594,
+        "broadphase_ms": 0.056,
+        "narrowphase_ms": 0.0654,
+        "solve_ms": 0.137,
+        "integrate_ms": 0.0009,
+        "pairs": 605.3,
+        "manifolds": 473.3,
+        "final_hash": "0x521135393f18797f"
+      },
+      {
+        "bodies": 500,
+        "broadphase": "brute_force",
+        "step_ms": 0.7807,
+        "broadphase_ms": 0.3239,
+        "narrowphase_ms": 0.1433,
+        "solve_ms": 0.3116,
+        "integrate_ms": 0.0019,
+        "pairs": 1280.8,
+        "manifolds": 1023.0,
+        "final_hash": "0x17d4de622216e511"
+      },
+      {
+        "bodies": 500,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 0.6113,
+        "broadphase_ms": 0.151,
+        "narrowphase_ms": 0.1469,
+        "solve_ms": 0.3115,
+        "integrate_ms": 0.0019,
+        "pairs": 1280.8,
+        "manifolds": 1023.0,
+        "final_hash": "0x17d4de622216e511"
+      },
+      {
+        "bodies": 1000,
+        "broadphase": "brute_force",
+        "step_ms": 2.0467,
+        "broadphase_ms": 1.096,
+        "narrowphase_ms": 0.3038,
+        "solve_ms": 0.643,
+        "integrate_ms": 0.0039,
+        "pairs": 2627.9,
+        "manifolds": 2042.5,
+        "final_hash": "0xc3399fc06430d606"
+      },
+      {
+        "bodies": 1000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 1.3214,
+        "broadphase_ms": 0.3655,
+        "narrowphase_ms": 0.3088,
+        "solve_ms": 0.643,
+        "integrate_ms": 0.004,
+        "pairs": 2627.9,
+        "manifolds": 2042.5,
+        "final_hash": "0xc3399fc06430d606"
+      },
+      {
+        "bodies": 2000,
+        "broadphase": "brute_force",
+        "step_ms": 6.1528,
+        "broadphase_ms": 3.9905,
+        "narrowphase_ms": 0.7229,
+        "solve_ms": 1.4292,
+        "integrate_ms": 0.01,
+        "pairs": 5383.7,
+        "manifolds": 4185.5,
+        "final_hash": "0x5b2775bcf42fffeb"
+      },
+      {
+        "bodies": 2000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 3.0029,
+        "broadphase_ms": 0.8854,
+        "narrowphase_ms": 0.6983,
+        "solve_ms": 1.4105,
+        "integrate_ms": 0.0086,
+        "pairs": 5383.7,
+        "manifolds": 4185.5,
+        "final_hash": "0x5b2775bcf42fffeb"
+      },
+      {
+        "bodies": 4000,
+        "broadphase": "brute_force",
+        "step_ms": 19.038,
+        "broadphase_ms": 13.9625,
+        "narrowphase_ms": 1.4356,
+        "solve_ms": 3.6086,
+        "integrate_ms": 0.031,
+        "pairs": 11439.5,
+        "manifolds": 9140.0,
+        "final_hash": "0xacb7ab8b89352ec8"
+      },
+      {
+        "bodies": 4000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 7.1205,
+        "broadphase_ms": 2.2563,
+        "narrowphase_ms": 1.4068,
+        "solve_ms": 3.4274,
+        "integrate_ms": 0.0298,
+        "pairs": 11439.5,
+        "manifolds": 9140.0,
+        "final_hash": "0xacb7ab8b89352ec8"
+      }
+    ]
+  },
+  "current": {
+    "warmup_steps": 120,
+    "window_steps": 120,
+    "repeats": 5,
+    "runs": [
+      {
+        "bodies": 250,
+        "broadphase": "brute_force",
+        "step_ms": 0.3038,
+        "broadphase_ms": 0.0979,
+        "narrowphase_ms": 0.0649,
+        "solve_ms": 0.1399,
+        "integrate_ms": 0.001,
+        "pairs": 605.3,
+        "manifolds": 473.3,
+        "final_hash": "0x521135393f18797f"
+      },
+      {
+        "bodies": 250,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 0.263,
+        "broadphase_ms": 0.0566,
+        "narrowphase_ms": 0.0667,
+        "solve_ms": 0.1388,
+        "integrate_ms": 0.0009,
+        "pairs": 605.3,
+        "manifolds": 473.3,
+        "final_hash": "0x521135393f18797f"
+      },
+      {
+        "bodies": 500,
+        "broadphase": "brute_force",
+        "step_ms": 0.7793,
+        "broadphase_ms": 0.3233,
+        "narrowphase_ms": 0.1445,
+        "solve_ms": 0.3096,
+        "integrate_ms": 0.0019,
+        "pairs": 1280.8,
+        "manifolds": 1023.0,
+        "final_hash": "0x17d4de622216e511"
+      },
+      {
+        "bodies": 500,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 0.6098,
+        "broadphase_ms": 0.1508,
+        "narrowphase_ms": 0.1478,
+        "solve_ms": 0.3093,
+        "integrate_ms": 0.0019,
+        "pairs": 1280.8,
+        "manifolds": 1023.0,
+        "final_hash": "0x17d4de622216e511"
+      },
+      {
+        "bodies": 1000,
+        "broadphase": "brute_force",
+        "step_ms": 2.046,
+        "broadphase_ms": 1.0945,
+        "narrowphase_ms": 0.3073,
+        "solve_ms": 0.6403,
+        "integrate_ms": 0.0038,
+        "pairs": 2627.9,
+        "manifolds": 2042.5,
+        "final_hash": "0xc3399fc06430d606"
+      },
+      {
+        "bodies": 1000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 1.3203,
+        "broadphase_ms": 0.3652,
+        "narrowphase_ms": 0.311,
+        "solve_ms": 0.6399,
+        "integrate_ms": 0.0041,
+        "pairs": 2627.9,
+        "manifolds": 2042.5,
+        "final_hash": "0xc3399fc06430d606"
+      },
+      {
+        "bodies": 2000,
+        "broadphase": "brute_force",
+        "step_ms": 6.0737,
+        "broadphase_ms": 3.9647,
+        "narrowphase_ms": 0.6993,
+        "solve_ms": 1.401,
+        "integrate_ms": 0.0087,
+        "pairs": 5383.7,
+        "manifolds": 4185.5,
+        "final_hash": "0x5b2775bcf42fffeb"
+      },
+      {
+        "bodies": 2000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 3.0039,
+        "broadphase_ms": 0.8864,
+        "narrowphase_ms": 0.7014,
+        "solve_ms": 1.4069,
+        "integrate_ms": 0.0091,
+        "pairs": 5383.7,
+        "manifolds": 4185.5,
+        "final_hash": "0x5b2775bcf42fffeb"
+      },
+      {
+        "bodies": 4000,
+        "broadphase": "brute_force",
+        "step_ms": 18.6761,
+        "broadphase_ms": 13.97,
+        "narrowphase_ms": 1.4484,
+        "solve_ms": 3.2236,
+        "integrate_ms": 0.0338,
+        "pairs": 11439.5,
+        "manifolds": 9140.0,
+        "final_hash": "0xacb7ab8b89352ec8"
+      },
+      {
+        "bodies": 4000,
+        "broadphase": "sweep_and_prune",
+        "step_ms": 7.3859,
+        "broadphase_ms": 2.3808,
+        "narrowphase_ms": 1.5079,
+        "solve_ms": 3.4526,
+        "integrate_ms": 0.0444,
+        "pairs": 11439.5,
+        "manifolds": 9140.0,
+        "final_hash": "0xacb7ab8b89352ec8"
+      }
+    ]
+  }
+}

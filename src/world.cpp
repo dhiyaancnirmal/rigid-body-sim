@@ -218,21 +218,51 @@ void World::find_pairs(double dt) {
             for (int b = a + 1; b < n; ++b) consider(a, b);
         }
     } else {
-        // Sweep and prune on x. Ties break on body index so the order is a
-        // total order and every platform's std::sort gives the same result.
-        order_.resize(n);
-        for (int i = 0; i < n; ++i) order_[i] = i;
-        std::sort(order_.begin(), order_.end(), [&](int i, int j) {
+        // Sweep and prune on x. Ties break on body index, so the order is a
+        // total order and any correct sort gives the same result.
+        auto before = [&](int i, int j) {
             if (aabbs_[i].lower.x != aabbs_[j].lower.x) return aabbs_[i].lower.x < aabbs_[j].lower.x;
             return i < j;
-        });
+        };
+        if (static_cast<int>(order_.size()) != n) {
+            order_.resize(n);
+            for (int i = 0; i < n; ++i) order_[i] = i;
+            std::sort(order_.begin(), order_.end(), before);
+        } else {
+            // Bodies move little per step, so last step's order is nearly
+            // sorted and insertion sort runs in close to linear time.
+            for (int s = 1; s < n; ++s) {
+                const int id = order_[s];
+                int t = s - 1;
+                while (t >= 0 && before(id, order_[t])) {
+                    order_[t + 1] = order_[t];
+                    --t;
+                }
+                order_[t + 1] = id;
+            }
+        }
+        // Copy the boxes into sweep order so the inner loop reads contiguous
+        // memory, and test the cheap overlap before touching anything else.
+        sorted_.resize(n);
         for (int s = 0; s < n; ++s) {
             const int i = order_[s];
-            const double hi = aabbs_[i].upper.x;
+            sorted_[s] = {aabbs_[i], i, bodies[i].is_static()};
+        }
+        for (int s = 0; s < n; ++s) {
+            const SweepBox& bi = sorted_[s];
+            const double hi = bi.box.upper.x;
             for (int t = s + 1; t < n; ++t) {
-                const int j = order_[t];
-                if (aabbs_[j].lower.x > hi) break;
-                consider(i, j);
+                const SweepBox& bj = sorted_[t];
+                if (bj.box.lower.x > hi) break;
+                if (bj.box.lower.y > bi.box.upper.y || bi.box.lower.y > bj.box.upper.y) continue;
+                if (bi.is_static && bj.is_static) continue;
+                const int a = bi.id < bj.id ? bi.id : bj.id;
+                const int b = bi.id < bj.id ? bj.id : bi.id;
+                if (!jointed_.empty() &&
+                    std::binary_search(jointed_.begin(), jointed_.end(), pair_key(a, b))) {
+                    continue;
+                }
+                pairs_.push_back({a, b, margins_[a] + margins_[b] + settings.linear_slop});
             }
         }
         // Same pair order as brute force, so the solver sees identical input.

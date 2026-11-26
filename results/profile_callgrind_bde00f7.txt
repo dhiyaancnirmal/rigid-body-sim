@@ -1,0 +1,11 @@
+# callgrind, bench_step --quick (250 and 1000 bodies, brute force and sweep and prune), commit bde00f7, before packed solver bodies
+# instructions retired per function, top 8
+3,388,971,966 (100.0%)  PROGRAM TOTALS
+1,649,782,696 (48.68%)  ???:rbsim::World::find_pairs(double)
+  991,934,518 (29.27%)  ???:rbsim::World::solve_velocities()
+  226,376,820 ( 6.68%)  ???:rbsim::collide(rbsim::Shape const&, rbsim::Transform const&, rbsim::Shape const&, rbsim::Transform const&, double)
+  136,269,030 ( 4.02%)  ???:rbsim::World::narrowphase()
+   94,537,874 ( 2.79%)  ???:rbsim::(anonymous namespace)::to_world(rbsim::Shape const&, rbsim::Transform const&)
+   68,864,518 ( 2.03%)  ???:rbsim::World::prepare(double)
+   64,822,746 ( 1.91%)  ???:rbsim::(anonymous namespace)::polygon_circle(rbsim::Shape const&, rbsim::Transform const&, rbsim::Shape const&, rbsim::Transform const&, double) [clone .isra.0]
+   45,149,464 ( 1.33%)  ???:rbsim::World::warm_start()
