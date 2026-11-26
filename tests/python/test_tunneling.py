@@ -3,23 +3,7 @@
 from hypothesis import given
 from hypothesis import strategies as st
 
-import rbsim
-
-WALL_HALF = 0.05  # a wall 10 cm thick
-
-
-def shoot(speed, shape, size, angle, dt, speculative=True):
-    s = rbsim.Settings()
-    s.gravity = (0.0, 0.0)
-    s.speculative = speculative
-    w = rbsim.World(s)
-    w.add_box(0.0, 0.0, WALL_HALF, 20.0, static=True)
-    if shape == "circle":
-        w.add_circle(-3.0, 0.3, size, vx=speed)
-    else:
-        w.add_box(-3.0, 0.3, size, size, angle=angle, vx=speed)
-    w.step(dt, n=int(3.0 / (speed * dt)) + 60)
-    return w.positions()[1, 0]
+from rbsim.experiments import WALL_HALF, shoot
 
 
 @given(
@@ -30,13 +14,12 @@ def shoot(speed, shape, size, angle, dt, speculative=True):
     dt=st.sampled_from([1 / 30, 1 / 60, 1 / 240]),
 )
 def test_no_tunneling_through_static_wall_up_to_10_km_per_s(speed, shape, size, angle, dt):
-    x = shoot(speed, shape, size, angle, dt)
-    # Centre stays on the near side, outside the wall (allowing the slop).
-    assert x < -WALL_HALF
+    # Centre stays on the near side, outside the 10 cm wall.
+    assert shoot(speed, shape, size, angle, dt) < -WALL_HALF
 
 
 def test_discrete_contacts_alone_do_tunnel():
-    # The negative control: same shot with speculative contacts off passes
-    # through once a step moves the body further than it is thick.
+    # Negative control: with speculative contacts off, the same shot passes
+    # through once a step moves the body further than body plus wall.
     assert shoot(10.0, "circle", 0.25, 0.0, 1 / 60, speculative=False) < -WALL_HALF
     assert shoot(100.0, "circle", 0.25, 0.0, 1 / 60, speculative=False) > WALL_HALF

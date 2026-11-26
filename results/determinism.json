@@ -1,0 +1,11 @@
+{
+  "compiler": "c++ (Debian 14.2.0-19) 14.2.0",
+  "expected": "0x778f89916d94c2de",
+  "builds": [
+    {"name": "O0", "cxx_flags": "-O0", "fp_flags": "-ffp-contract=off;-fno-fast-math", "hash": "0x778f89916d94c2de"},
+    {"name": "O2", "cxx_flags": "-O2", "fp_flags": "-ffp-contract=off;-fno-fast-math", "hash": "0x778f89916d94c2de"},
+    {"name": "O3", "cxx_flags": "-O3", "fp_flags": "-ffp-contract=off;-fno-fast-math", "hash": "0x778f89916d94c2de"},
+    {"name": "O3_avx2_fma", "cxx_flags": "-O3 -march=x86-64-v3", "fp_flags": "-ffp-contract=off;-fno-fast-math", "hash": "0x778f89916d94c2de"},
+    {"name": "O3_avx2_fma_contract_fast", "cxx_flags": "-O3 -march=x86-64-v3", "fp_flags": "-ffp-contract=fast", "hash": "0xf5b1f11571dc1793"}
+  ]
+}

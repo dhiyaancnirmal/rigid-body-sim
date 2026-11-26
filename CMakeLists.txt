@@ -11,7 +11,7 @@ option(RBSIM_PYTHON "Build the Python module" ON)
 
 # Determinism: no fused multiply-add contraction and no fast-math, so every
 # build performs the same IEEE operations in the same order. No -march=native.
-set(RBSIM_FP_FLAGS -ffp-contract=off -fno-fast-math)
+set(RBSIM_FP_FLAGS "-ffp-contract=off;-fno-fast-math" CACHE STRING "Floating-point flags for the core")
 
 add_library(rbsim_core STATIC src/shape.cpp src/collide.cpp src/world.cpp)
 target_include_directories(rbsim_core PUBLIC include)

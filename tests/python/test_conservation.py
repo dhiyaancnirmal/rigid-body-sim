@@ -5,18 +5,9 @@ import math
 from hypothesis import given
 from hypothesis import strategies as st
 
-import rbsim
+from rbsim.experiments import free_space
 
 DT = 1.0 / 60.0
-
-
-def free_space(**overrides):
-    s = rbsim.Settings()
-    s.gravity = (0.0, 0.0)
-    for k, v in overrides.items():
-        setattr(s, k, v)
-    return rbsim.World(s)
-
 
 body = st.tuples(
     st.sampled_from(["circle", "box"]),
